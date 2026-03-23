@@ -13,6 +13,7 @@ def signup_user(db: Session, user: schemas.UserCreate):  #to signup if new user,
         models.User.email == user.email
     ).first()
 
+
     if existing_user:
         return None
 
@@ -121,18 +122,20 @@ def get_user_todos(db: Session):
     return todos
 
 
+#to fetch single todo
 def get_todo(db: Session, todo_id: str):
     return db.query(models.Todo).filter(
         models.Todo.id == todo_id, 
         models.Todo.is_deleted_check == False
-        ).first()   #to fetch single todo
+        ).first()   
 
 
+#to update the todo
 def update_todo(db: Session, todo_id: str, todo: schemas.TodoUpdate):
     existing_todo = db.query(models.Todo).filter(
         models.Todo.id == todo_id,
         models.Todo.is_deleted_check == False
-        ).first()  #to update single todo list of user
+        ).first()  
    
     if not existing_todo:
         return None
@@ -174,3 +177,16 @@ def delete_todo(db: Session, todo_id: str):
 
 #db.delete(todo) ----->> to delete that row of todo list
 #db.commit() --------->> save to db
+
+
+#models contains the database tables as class in python and rows as objects.
+#schemas contains the input/output structure (API Body)
+
+#return db.query(models.User).filter(models.User.id == user_id).first()
+#db means i want to talk to database.
+#.query(models.User) means start a query on table User.
+#.filter(models.User.id == user_id) means filter out whose id == user_id 
+#.first() returns the first occurrence
+
+#so the meaning of above line is 
+#SELECT * FROM users WHERE id = user_id ;

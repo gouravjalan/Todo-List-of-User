@@ -1,7 +1,8 @@
-from sqlalchemy import Column, Integer, String, Boolean, ForeignKey
+from sqlalchemy import Column, String, Boolean, ForeignKey
 from sqlalchemy.orm import relationship #to create relation between tables
 from database import Base #base class from database file
 import uuid
+# from sqlalchemy import Integer
 
 
 class User(Base):  #base is inherited here.
@@ -45,3 +46,8 @@ class Todo(Base):
 #we have made use of uuid here which hae type uuid4(), instead of using normal id concept,  we have used uuid which is hard to debug and so that the user data will be safe.
 #uuid4 version is most commonly used as it generates a random number every time it executes and it is 128 bits wide which means single char can have 128 different combo's which is very hard to debug and get the info.
 #so for this reason uuid4 is used here.
+
+#default=lambda: str(uuid.uuid4())
+# default means use this value if user dont provide any.
+#lambda is function which here means the run this code every time a new row is created.
+#id = str(uuid.uuid4()) helps to generate the id automatically when it is not provided by user.

@@ -12,6 +12,7 @@ class UserResponse(BaseModel):  #defines what api returns & password is hidden f
     name: str
     email: str
 
+    # the below line allows to convert SQLAlchemy Object ---->> Pydantic Object
     class Config:
         from_attributes = True
 
@@ -21,7 +22,7 @@ class UserLogin(BaseModel):  #to login the user
 
 
 class Token(BaseModel):   
-    access_token : str
+    access_token : str   #this is type annotation
     token_type : str
     refresh_token : str
 
@@ -50,3 +51,4 @@ class TodoResponse(BaseModel): #api response structure.
 #from pydantic import BaseModel #to validate api data.
 #pydantic is data validation library used for data validataion & parsing.
 #BaseModel is base class used to create schemas in FastAPI, All schemas must inherit from FastAPI.
+#pydantic model is python class that define structure of python class using type hints.

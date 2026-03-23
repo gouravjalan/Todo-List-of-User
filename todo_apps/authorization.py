@@ -4,15 +4,15 @@ from datetime import datetime,timedelta
 from fastapi import HTTPException
 
 
-#secret key for jwt
-SECRET_KEY = "mysecretkey"
-ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 3
+
+SECRET_KEY = "mysecretkey"     #tosign jwt token
+ALGORITHM = "HS256"            #HMAC + SHA256 to encrypt and verify token
+ACCESS_TOKEN_EXPIRE_MINUTES = 3   #3 minutes
 
 #password hashing
 pwd_context = CryptContext(
-    schemes=["bcrypt"],
-    deprecated="auto"
+    schemes=["bcrypt"],  #bcrypt is hashing alog.
+    deprecated="auto"       #handle old hash automatically.
 )
 
 
@@ -21,7 +21,8 @@ def hash_password(password: str):
     if len(password) > 72:
         password = password[:72]
 
-    return pwd_context.hash(password)
+    return pwd_context.hash(password) #the object that calls .hash() method to hash the plain password.
+
 
 #verify password
 def verify_password(plain_password:str, hashed_password:str):
@@ -75,7 +76,7 @@ def verify_token(token:str):
     except JWTError:
         # return None
         raise HTTPException(status_code=401,detail="Invalid Token")
-    
+        #runs if token is invalid/wrong/corrupted.
     
     
 #to create a refresh token
@@ -98,4 +99,16 @@ def create_refresh_token(data:dict):
 #ACCESS_TOKEN_EXPIRE_MINUTES = 30 tell that token will expire in 30 minutes
 #data:dict is function that will take dictionary (payload) as data.
 #.copy() to make copy of input data to avoid the alteration of it.
-#utcnow() gets current time, and add 30minutes to it.
+#utcnow() gets current time, and timedelta() (add 30minutes to it)
+
+#jwt to create and decode tokens
+#JWTError (for genereal error like invalid token)
+#ExpiredSignatureError   when token in expired.
+#datetime for current time
+#timedelta to add time(min., days)
+#CryptContext is a password hashing manager from Passlib i.e it is object that handles password hashing and verifying passwords for you.
+# passlib.context is module/package in passlib library that contatins tools to manage password hashing. Ex: Cryptocontext.
+# jose (JavaScript Object Signing & Encryption) is library  used for creating and verifying JWT Tokens
+#jwt used for creating and decoding token
+#JWTError is error class 
+#ExpiredSignatureError is specific error used when token expiry time is over. 

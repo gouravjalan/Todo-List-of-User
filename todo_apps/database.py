@@ -14,7 +14,7 @@ SessionLocal = sessionmaker(
 )
 
 Base = declarative_base()
-#base class for all db models.
+#base class for all db models. Parent class for all db tables.
 
 #SessionLocal = sessionmaker(bind=engine)
 
@@ -39,3 +39,5 @@ Base = declarative_base()
 #engine ---->> a variable that acts as bridge between python and mysql
 #create_engine() ---->> a function if sqlalchemy that create a connection between python and db.
 #bind = engine ---->> helps sqlalchemy to know which database to connect with.
+#autocommit = False  means changes are not saved automatically.
+#autoflush = false  means chaneges are not automatically sent to db before queries.
