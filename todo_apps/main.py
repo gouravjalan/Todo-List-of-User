@@ -1,7 +1,8 @@
 from fastapi import FastAPI, Depends, HTTPException
 from sqlalchemy.orm import Session
 from database import engine, SessionLocal #imports database connection
-from authorization import create_access_token,verify_token,create_refresh_token
+from authorization import create_access_token,verify_token
+from authorization import create_refresh_token      
 
 import models
 import schemas
@@ -72,16 +73,16 @@ def login(user: schemas.UserLogin, db: Session = Depends(get_db)):
     }
 
 #an api for a refresh token
-@app.post("/Refresh")
-def refresh_token(refresh_token:str):
-    user_id = verify_token(refresh_token)
+# @app.post("/Refresh")
+# def refresh_token(refresh_token:str):
+#     user_id = verify_token(refresh_token)
 
-    if not user_id:
-        raise HTTPException(status_code=401,detail="Invalid Refresh Token")
+#     if not user_id:
+#         raise HTTPException(status_code=401,detail="Invalid Refresh Token")
     
-    new_access_token = create_access_token(data={"sub" : user_id})
+#     new_access_token = create_access_token(data={"sub" : user_id})
 
-    return{ "refreshed_access_token" : new_access_token }
+#     return{ "refreshed_access_token" : new_access_token }
 
 
 #create user is not used bcoz signup is providing the same functionality as it.
