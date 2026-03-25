@@ -86,5 +86,12 @@ ALTER TABLE todo_list AUTO_INCREMENT = 1;
 ALTER TABLE todo_list ADD COLUMN is_deleted_check BOOLEAN DEFAULT 0;
 -- ALTER TABLE todo_list DROP COLUMN is_deleted;
 
+ALTER TABLE users ADD COLUMN role ENUM('user', 'admin') DEFAULT 'user';
+ALTER TABLE users DROP COLUMN role;
+
+-- to make a user admin after login via db only manually
+UPDATE users SET role='admin' WHERE email='rashi02@gmail.com';
+UPDATE users SET role='admin' WHERE email='viratkohli@gmail.com';
+
 select * from users;
 select * from todo_list;

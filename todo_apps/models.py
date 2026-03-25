@@ -3,7 +3,7 @@ from sqlalchemy.orm import relationship #to create relation between tables
 from database import Base #base class from database file
 import uuid
 # from sqlalchemy import Integer
-
+from sqlalchemy import Enum
 
 class User(Base):  #base is inherited here.
     __tablename__ = "users"  #should match with db table name.
@@ -13,7 +13,7 @@ class User(Base):  #base is inherited here.
     name = Column(String(100))
     email = Column(String(100), unique=True)
     password = Column(String(255))
-    #is_deleted = Column(Boolean,default=False)
+    role = Column(Enum("user","admin"), default = "user")
     todos = relationship("Todo", back_populates="user") 
     #1 user cann have multiple todo list
 

@@ -7,7 +7,7 @@ from fastapi import HTTPException
 
 SECRET_KEY = "mysecretkey"     #tosign jwt token
 ALGORITHM = "HS256"            #HMAC + SHA256 to encrypt and verify token
-ACCESS_TOKEN_EXPIRE_MINUTES = 3   #3 minutes
+ACCESS_TOKEN_EXPIRE_MINUTES = 30   #3 minutes
 
 #password hashing
 pwd_context = CryptContext(
@@ -62,9 +62,15 @@ def verify_token(token:str):
     try:
         payload = jwt.decode(token,SECRET_KEY,algorithms=[ALGORITHM])  #deocdes the parameters that r given.
         user_id = payload.get("sub") #from the decoded data get the subject/id of user and store in user_id.
+        role = payload.get("role")
+        # return user_id.strip() if user_id else None
+        #strip is used to remove unwanted space.
 
-        return user_id.strip() if user_id else None
-    #strip is used to remove unwanted space.
+        #for rbac
+        return {
+            "user_id" : user_id.strip(),
+            "role": role
+        } 
 
     
     #when the token gets expired.

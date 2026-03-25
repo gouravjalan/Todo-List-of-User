@@ -11,6 +11,7 @@ class UserResponse(BaseModel):  #defines what api returns & password is hidden f
     id: str
     name: str
     email: str
+    role: str
 
     # the below line allows to convert SQLAlchemy Object ---->> Pydantic Object
     class Config:
@@ -19,7 +20,6 @@ class UserResponse(BaseModel):  #defines what api returns & password is hidden f
 class UserLogin(BaseModel):  #to login the user
     email: str
     password: str
-
 
 class Token(BaseModel):   
     access_token : str   #this is type annotation
