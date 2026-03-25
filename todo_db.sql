@@ -92,6 +92,7 @@ ALTER TABLE users DROP COLUMN role;
 -- to make a user admin after login via db only manually
 UPDATE users SET role='admin' WHERE email='rashi02@gmail.com';
 UPDATE users SET role='admin' WHERE email='viratkohli@gmail.com';
+UPDATE users SET role='admin' WHERE email='msdhoni1997@gmail.com';
 
 select * from users;
 select * from todo_list;
