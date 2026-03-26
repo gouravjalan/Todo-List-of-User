@@ -93,6 +93,11 @@ ALTER TABLE users DROP COLUMN role;
 UPDATE users SET role='admin' WHERE email='rashi02@gmail.com';
 UPDATE users SET role='admin' WHERE email='viratkohli@gmail.com';
 UPDATE users SET role='admin' WHERE email='msdhoni1997@gmail.com';
+-- UPDATE users SET role='admin' WHERE email='sachint@gmail.com';
+UPDATE users SET role='admin' WHERE email='sachin100@gmial.com';
+UPDATE users SET role='admin' WHERE email='gsjalan@gmail.com';
+
+
 
 select * from users;
 select * from todo_list;
