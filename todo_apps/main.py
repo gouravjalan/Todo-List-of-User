@@ -26,7 +26,7 @@ def get_db():
 # USER ROUTES
 
 #sign up
-@app.post("/signup", response_model=schemas.UserResponse)
+@app.post("/Signup", response_model=schemas.UserResponse)
 def signup(user: schemas.UserCreate, db: Session = Depends(get_db)):
 
     new_user = crud.signup_user(db, user)
@@ -53,7 +53,7 @@ def signup(user: schemas.UserCreate, db: Session = Depends(get_db)):
 #this is login part when using jwt login
 # this for earlier when json format 
 
-@app.post("/login", response_model=schemas.Token)
+@app.post("/Login", response_model=schemas.Token)
 def login(user: schemas.UserLogin, db: Session = Depends(get_db)):
     
     existing_user = crud.login_user(db, user)
@@ -102,7 +102,7 @@ def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
 #     return crud.get_users(db)
 
 #for rbac for all users
-@app.get("/users/", response_model=list[schemas.UserResponse])
+@app.get("/users/get_all_users", response_model=list[schemas.UserResponse])
 def get_users(token:str, db: Session = Depends(get_db)):
     token_user = verify_token(token)
 
@@ -116,7 +116,7 @@ def get_users(token:str, db: Session = Depends(get_db)):
 
 
 #get single user on basis of id
-@app.get("/users/{user_id}", response_model=schemas.UserResponse)
+@app.get("/users/get_single_user/{user_id}", response_model=schemas.UserResponse)
 def get_user(user_id: str, token :str, db: Session = Depends(get_db)):
     token_user = verify_token(token)
     if token_user == "expire":
@@ -148,7 +148,7 @@ def get_user(user_id: str, token :str, db: Session = Depends(get_db)):
 # TODO ROUTES
 
 #create todo list (authenticated)
-@app.post("/users/{user_id}/todos/", response_model=schemas.TodoResponse)
+@app.post("/users/create_todo_list/{user_id}", response_model=schemas.TodoResponse)
 def create_todo(user_id: str, token:str, todo: schemas.TodoCreate, db: Session = Depends(get_db)):
 
     token_user = verify_token(token)
@@ -184,7 +184,7 @@ def create_todo(user_id: str, token:str, todo: schemas.TodoCreate, db: Session =
 #     return crud.get_user_todos(db)
 
 #with rbac
-@app.get("/todo list of users", response_model=list[schemas.TodoResponse])
+@app.get("/todos/get_all_todos", response_model=list[schemas.TodoResponse])
 def get_user_todos(token: str, db: Session = Depends(get_db)):
     token_user = verify_token(token)
 
@@ -197,7 +197,7 @@ def get_user_todos(token: str, db: Session = Depends(get_db)):
     return crud.get_user_todos(db)
 
 #get todo by id  todo_id is id of todo_list table
-@app.get("/todos/{todo_id}", response_model=schemas.TodoResponse, )
+@app.get("/todos/get_single_user_todo/{todo_id}", response_model=schemas.TodoResponse, )
 def get_todo(todo_id: str, token :str, db: Session = Depends(get_db)):
     token_user = verify_token(token)
 
@@ -219,7 +219,7 @@ def get_todo(todo_id: str, token :str, db: Session = Depends(get_db)):
     return todo
 
 #update todo list
-@app.put("/todos/{todo_id}", response_model=schemas.TodoResponse)
+@app.put("/todos/update_todos/{todo_id}", response_model=schemas.TodoResponse)
 def update_todo(todo_id: str, token : str , todo: schemas.TodoUpdate, db: Session = Depends(get_db)):
     token_user = verify_token(token)
 
@@ -245,7 +245,7 @@ def update_todo(todo_id: str, token : str , todo: schemas.TodoUpdate, db: Sessio
     return updated
 
 #delete todo list
-@app.delete("/todos/{todo_id}")
+@app.delete("/todos/delete_todos/{todo_id}")
 def delete_todo(todo_id: str, token: str, db: Session = Depends(get_db)):
     #validat the token
     token_user = verify_token(token)
