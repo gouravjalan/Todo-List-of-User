@@ -2,7 +2,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker,declarative_base
 #from sqlalchemy.ext.declarative import declarative_base
 
-DATABASE_URL = "mysql+pymysql://root:manager@localhost/todo_db"
+DATABASE_URL = "mysql+pymysql://username:password@localhost/todo_db"
 
 engine = create_engine(DATABASE_URL)
 #creates a db engine
@@ -28,16 +28,15 @@ Base = declarative_base()
 #database_url --->> tells python to connect to this url.
 
 #DATABASE_URL = "mysql+pymysql://root:manager@localhost/todo_db"
-# mysql  --->> is database type
-#pymysql ---->> is python driver to connect MySQL
-#root ------->> is username of MySQL
-#manager ---->> is password
+#mysql  --->> is database type
+#pymysql ---->> is python driver to connect MySQL (talk with database)
+
 #localhost -->> is db server location
 #todo_db ---->> the database name
 
 #engine = create_engine(DATABASE_URL)
 #engine ---->> a variable that acts as bridge between python and mysql
-#create_engine() ---->> a function if sqlalchemy that create a connection between python and db.
+#create_engine() ---->> a function of sqlalchemy that create a connection between python and db.
 #bind = engine ---->> helps sqlalchemy to know which database to connect with.
 #autocommit = False  means changes are not saved automatically.
-#autoflush = false  means chaneges are not automatically sent to db before queries.
+#autoflush = False  means chaneges are not automatically sent to db before queries.

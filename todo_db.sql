@@ -8,7 +8,6 @@ CREATE TABLE users(
     password varchar(100)
     );
     
-    
 CREATE TABLE todo_list(
 	id int auto_increment primary key,
     title varchar(255),
@@ -18,10 +17,18 @@ CREATE TABLE todo_list(
     FOREIGN KEY (user_id) REFERENCES users(id)
     );
     
+CREATE TABLE user_role(
+	role_id CHAR(36) PRIMARY KEY,
+    role ENUM ('admin','user'),
+    user_role_id CHAR(36),
+    
+    FOREIGN KEY (user_role_id) REFERENCES users(id)
+    );
     
 SHOW TABLES;
 DESCRIBE users;
 DESCRIBE todo_list;
+DESCRIBE user_role; 
 
 ALTER TABLE users MODIFY password VARCHAR(255), MODIFY name VARCHAR(255), MODIFY email VARCHAR(255);
 ALTER TABLE users AUTO_INCREMENT = 1;
@@ -93,11 +100,29 @@ ALTER TABLE users DROP COLUMN role;
 UPDATE users SET role='admin' WHERE email='rashi02@gmail.com';
 UPDATE users SET role='admin' WHERE email='viratkohli@gmail.com';
 UPDATE users SET role='admin' WHERE email='msdhoni1997@gmail.com';
--- UPDATE users SET role='admin' WHERE email='sachint@gmail.com';
+
 UPDATE users SET role='admin' WHERE email='sachin100@gmial.com';
 UPDATE users SET role='admin' WHERE email='gsjalan@gmail.com';
 
+UPDATE users SET email = 'sachin100@gmail.com' WHERE id = 'ad768d12-0084-48f6-a332-5fb5e447d356';
 
+ALTER TABLE users DROP COLUMN role;
+
+-- To check if the user_role table is accepting data
+INSERT INTO user_role (role_id, role, user_role_id) VALUES (UUID(), 'admin', 'acf60103-e610-49bc-98b0-a547848a2d45');
+INSERT INTO user_role (role_id, role, user_role_id) VALUES (UUID(), 'admin', '0b7c5091-dfde-44cc-b279-f970a9a64063');
+
+SELECT * FROM user_role WHERE user_role_id = 'cdf77685-70f1-4024-908c-e6b388857951';
+
+-- changed the name of user_role_id to user_id bcoz of naming mismatch for python as it uses user_id
+ALTER TABLE user_role CHANGE user_role_id user_id CHAR(36);
+
+
+DELETE FROM user_role;
+TRUNCATE TABLE user_role;
 
 select * from users;
 select * from todo_list;
+select * from user_role;
+
+-- SELECT * FROM user_roles;    the table does not exist

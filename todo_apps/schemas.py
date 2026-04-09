@@ -6,13 +6,14 @@ class UserCreate(BaseModel):   #during create user the 3 parameters should be us
     name: str
     email: str
     password: str
+    role: str | None = "user"  #for 3rd table
 
 class UserResponse(BaseModel):  #defines what api returns & password is hidden for security
     id: str
     name: str
     email: str
-    role: str
-
+    #role: str
+    
     # the below line allows to convert SQLAlchemy Object ---->> Pydantic Object
     class Config:
         from_attributes = True
@@ -26,7 +27,7 @@ class Token(BaseModel):
     token_type : str
     refresh_token : str
 
-# TODO SCHEMAS
+#todo SCHEMAS
 
 class TodoCreate(BaseModel): #during creating todo list of user the 2 parameters should be used (request body)
     title: str

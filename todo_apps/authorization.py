@@ -11,7 +11,7 @@ ACCESS_TOKEN_EXPIRE_MINUTES = 30   #3 minutes
 
 #password hashing
 pwd_context = CryptContext(
-    schemes=["bcrypt"],  #bcrypt is hashing alog.
+    schemes=["bcrypt"],     #bcrypt is hashing alog.
     deprecated="auto"       #handle old hash automatically.
 )
 
@@ -31,28 +31,63 @@ def verify_password(plain_password:str, hashed_password:str):
 
     return pwd_context.verify(plain_password, hashed_password)
 
-#create jwt token
+#create jwt token before table 3
+# def create_access_token(data:dict):
+#     to_encode = data.copy()
+
+#     expire = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+
+#     to_encode.update({"exp" : expire})
+
+#     encoded_jwt = jwt.encode(to_encode,SECRET_KEY,algorithm=ALGORITHM) #expllicitly working as base64 only which encodes the data
+
+#     return encoded_jwt
+
+#after table 3
+# def create_access_token(user):
+#     # 🔥 Extract role from user_roles table
+#     role = user.roles[0].role if user.roles else None
+
+#     if not role:
+#         raise HTTPException(status_code=400, detail="User has no role assigned")
+
+#     to_encode = {
+#         "sub": str(user.id),
+#         "role": role
+#     }
+
+#     expire = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+#     to_encode.update({"exp": expire})
+
+#     return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+
+
+#after table 3 creation
 def create_access_token(data:dict):
     to_encode = data.copy()
 
     expire = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    to_encode.update({"exp": expire})
 
-    to_encode.update({"exp" : expire})
+    return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
 
-    encoded_jwt = jwt.encode(to_encode,SECRET_KEY,algorithm=ALGORITHM) #expllicitly working as base64 only which encodes the data
 
-    return encoded_jwt
 
-#to verify token  for oauth2 authentication.
+    
+# to verify token  for oauth2 authentication.
 # def verify_token(token: str = Depends(oauth2_scheme)):
 #     try:
 #         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
 #         user_id: str = payload.get("sub")
+#         role: str = payload.get("role")
 
-#         if user_id is None:
+#         if user_id is None or role is None:
 #             raise HTTPException(status_code=401, detail="Invalid token")
 
-#         return user_id
+#         return { 
+#             "user_id" : user_id,
+#             "role": role
+#         }
 
 #     except JWTError:
 #         raise HTTPException(status_code=401, detail="Invalid token")
@@ -67,33 +102,61 @@ def verify_token(token:str):
         #strip is used to remove unwanted space.
 
         #for rbac
-        return {
+        if not user_id or not role:
+            raise HTTPException(status_code=401,detail="Invalid Token")
+        
+        return{
             "user_id" : user_id.strip(),
             "role": role
         } 
-
-    
+        
     #when the token gets expired.
     except ExpiredSignatureError:
-        # return "expired"
         raise HTTPException(status_code=401,detail="Token Expired")
-    #to catch error if anything goes invalid/expired/worng
-    # instead of crashing, return none.
+        # return "expired"
+        #to catch error if anything goes invalid/expired/worng
+        # instead of crashing, return none.
+
     except JWTError:
-        # return None
         raise HTTPException(status_code=401,detail="Invalid Token")
+        # return None
         #runs if token is invalid/wrong/corrupted.
     
     
-#to create a refresh token
-def create_refresh_token(data:dict):
+#to create a refresh token before table 3
+# def create_refresh_token(data:dict):
+#     to_encode = data.copy()
+
+#     expire = datetime.utcnow() + timedelta(days=7)    #long expiry for refresh token.
+#     to_encode.update({"exp" : expire})
+
+#     return jwt.encode(to_encode,SECRET_KEY,algorithm=ALGORITHM)
+
+#after table 3
+# def create_refresh_token(user):
+#     role = user.roles[0].role if user.roles else None
+
+#     if not role:
+#         raise HTTPException(status_code=400, detail="User has no role assigned")
+
+#     to_encode = {
+#         "sub": str(user.id),
+#         "role": role
+#     }
+
+#     expire = datetime.utcnow() + timedelta(days=7)
+#     to_encode.update({"exp": expire})
+
+#     return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+
+#after table 3 creation
+def create_refresh_token(data: dict):
     to_encode = data.copy()
 
-    expire = datetime.utcnow() + timedelta(days=7)    #long expiry for refresh token.
-    to_encode.update({"exp" : expire})
+    expire = datetime.utcnow() + timedelta(days=7)
+    to_encode.update({"exp": expire})
 
-    return jwt.encode(to_encode,SECRET_KEY,algorithm=ALGORITHM)
-
+    return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
 
 #jwt used to encode and decode JWT Token
 #HWTError used to handle errors during decoding/verification

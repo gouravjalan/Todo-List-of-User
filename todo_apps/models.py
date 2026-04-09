@@ -13,10 +13,19 @@ class User(Base):  #base is inherited here.
     name = Column(String(100))
     email = Column(String(100), unique=True)
     password = Column(String(255))
-    role = Column(Enum("user","admin"), default = "user")
-    todos = relationship("Todo", back_populates="user") 
-    #1 user cann have multiple todo list
+    #role = Column(Enum("user","admin"), default = "user")
 
+    todos = relationship("Todo", back_populates="user") 
+        #1 user cann have multiple todo list
+
+    #roles = relationship("UserRole",back_populates="user")
+
+    #after above line
+    roles = relationship(
+        "UserRole",
+        back_populates="user",
+        cascade="all, delete-orphan"
+    )
 
 class Todo(Base):
     __tablename__ = "todo_list"
@@ -33,6 +42,22 @@ class Todo(Base):
     #connects todo back to user
     # it allows to connect objects in python just like foreign keys in sql.
     #backpopulates ---->> links tow relationships together(<--->)
+
+
+class UserRole(Base):
+    __tablename__ = "user_role"
+
+    role_id = Column(String(36),primary_key=True,default=lambda: str(uuid.uuid4()))
+    # role = Column(Enum("user","admin"))
+    role = Column(Enum("admin","user"))
+    # user_role_id = Column(String(36),ForeignKey("users.id"))
+    user_id = Column(String(36),ForeignKey("users.id"))
+    user = relationship("User",back_populates="roles")
+
+
+
+
+
 
 #basically models.py will have the basic details of database structure and it's table content.
 #Column() is function ----->>>  Column(datatype, options) is syntax

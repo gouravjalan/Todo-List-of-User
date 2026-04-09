@@ -34,7 +34,16 @@ def signup(user: schemas.UserCreate, db: Session = Depends(get_db)):
     if not new_user:
         raise HTTPException(status_code=400, detail="User already exists.")
 
-    return new_user
+    #after 3rd table
+    return {
+        "id":new_user.id,
+        "name": new_user.name,
+        "email":new_user.email,
+        "role": new_user.roles[0].role if new_user.roles else None
+    }
+
+    #before 3rd table
+    #return new_user
 
 #to login ----->>> this code before use of jwt
 # @app.post("/login")
@@ -61,10 +70,34 @@ def login(user: schemas.UserLogin, db: Session = Depends(get_db)):
     if not existing_user:
         raise HTTPException(status_code=401, detail="Invalid email or password.")
 
-    # create jwt token
-    access_token = create_access_token(data={"sub": str(existing_user.id), "role" :str(existing_user.role)})
+    #get role from user_role
+    role = existing_user.roles[0].role if existing_user.roles else None
+    
+    #existing_user.roles ----------> list of UserRole
+    #existing_user.roles[0]  ----------> One UserRole Object
+    #existing_user.roles[0].role ----------> Actual role value
 
-    refresh_token = create_refresh_token(data={"sub" : str(existing_user.id)})
+
+
+    # create jwt token (before 3rd table)
+    # access_token = create_access_token(data={"sub": str(existing_user.id), "role" :str(existing_user.role)})
+    # refresh_token = create_refresh_token(data={"sub" : str(existing_user.id)})
+
+    #after table 3 creation
+    if not role:
+        raise HTTPException(status_code=400,detail="User has no role assigned")
+
+    #below lines after making 3rd table 
+    access_token = create_access_token({
+        "sub": str(existing_user.id),
+        "role": role
+        }
+    )
+
+    refresh_token = create_refresh_token({
+        "sub": str(existing_user.id)
+        }
+    )
 
     return {
         "access_token": access_token,
@@ -112,11 +145,23 @@ def get_users(token:str, db: Session = Depends(get_db)):
     if token_user["role"] != "admin":
         raise HTTPException(status_code=403, detail= "Not authorized to access the data of all users.")
     
-    return crud.get_users(db)
+    #before 3rd table
+    #return crud.get_users(db)
 
+    #after table 3rd below lines
+    users = crud.get_users(db)
+    return [
+        {
+            "id": u.id,
+            "name": u.name,
+            "email": u.email,
+            "role": u.roles[0].role if u.roles else None
+        }
+        for u in users
+    ]
 
 #get single user on basis of id
-@app.get("/users/get_single_user/{user_id}", response_model=schemas.UserResponse)
+@app.get("/users/get_single_user", response_model=schemas.UserResponse)
 def get_user(user_id: str, token :str, db: Session = Depends(get_db)):
     token_user = verify_token(token)
     if token_user == "expire":
@@ -133,8 +178,16 @@ def get_user(user_id: str, token :str, db: Session = Depends(get_db)):
     if str(user_id) != token_user["user_id"] and token_user["role"] != "admin":
         raise HTTPException(status_code=403, detail="Not authorized to get the other users data.")
     
-    return user
+    #before 3rd table
+    #return user
 
+    #after 3rd table
+    return{
+        "id": user.id,
+        "name":user.name,
+        "email": user.email,
+        "role": user.roles[0].role if user.roles else None
+    }
 
 #for soft delete
 # @app.delete("/users/{user_id}")
@@ -148,7 +201,7 @@ def get_user(user_id: str, token :str, db: Session = Depends(get_db)):
 # TODO ROUTES
 
 #create todo list (authenticated)
-@app.post("/users/create_todo_list/{user_id}", response_model=schemas.TodoResponse)
+@app.post("/users/create_todo_list", response_model=schemas.TodoResponse)
 def create_todo(user_id: str, token:str, todo: schemas.TodoCreate, db: Session = Depends(get_db)):
 
     token_user = verify_token(token)
@@ -184,7 +237,7 @@ def create_todo(user_id: str, token:str, todo: schemas.TodoCreate, db: Session =
 #     return crud.get_user_todos(db)
 
 #with rbac
-@app.get("/todos/get_all_todos", response_model=list[schemas.TodoResponse])
+@app.get("/todos/get_all_users_todos", response_model=list[schemas.TodoResponse])
 def get_user_todos(token: str, db: Session = Depends(get_db)):
     token_user = verify_token(token)
 
@@ -197,7 +250,7 @@ def get_user_todos(token: str, db: Session = Depends(get_db)):
     return crud.get_user_todos(db)
 
 #get todo by id  todo_id is id of todo_list table
-@app.get("/todos/get_single_user_todo/{todo_id}", response_model=schemas.TodoResponse, )
+@app.get("/todos/get_single_user_todo", response_model=schemas.TodoResponse, )
 def get_todo(todo_id: str, token :str, db: Session = Depends(get_db)):
     token_user = verify_token(token)
 
@@ -219,7 +272,7 @@ def get_todo(todo_id: str, token :str, db: Session = Depends(get_db)):
     return todo
 
 #update todo list
-@app.put("/todos/update_todos/{todo_id}", response_model=schemas.TodoResponse)
+@app.put("/todos/update_todos", response_model=schemas.TodoResponse)
 def update_todo(todo_id: str, token : str , todo: schemas.TodoUpdate, db: Session = Depends(get_db)):
     token_user = verify_token(token)
 
@@ -231,12 +284,19 @@ def update_todo(todo_id: str, token : str , todo: schemas.TodoUpdate, db: Sessio
         raise HTTPException(status_code=401, detail="Invalid token")
     
     #for rbac only. If not then prefer updated at end.
-    updated = crud.update_todo(db,todo_id,todo)  #here the order in which we give parameters should be same as that in crud.py file function of update.
-    if not updated:
+    # updated = crud.update_todo(db,todo_id,todo)  #here the order in which we give parameters should be same as that in crud.py file function of update.
+    # if not updated:
+    #     raise HTTPException(status_code=404, detail="Todo not found")
+
+    #after table 3rd
+    existing = crud.get_todo(db,todo_id)
+    if not existing:
         raise HTTPException(status_code=404, detail="Todo not found")
 
+    #before and after table 3rd same part as it is
+    #just change existing to updated before making of 3rd table
     #updated for rbac
-    if str(updated.user_id) != token_user["user_id"] and token_user["role"] != "admin":
+    if str(existing.user_id) != token_user["user_id"] and token_user["role"] != "admin":
         raise HTTPException(status_code=403, detail="Not Authorized")
     
     #it is here bcoz we will update after the authorization not before authorization.
@@ -245,27 +305,59 @@ def update_todo(todo_id: str, token : str , todo: schemas.TodoUpdate, db: Sessio
     return updated
 
 #delete todo list
-@app.delete("/todos/delete_todos/{todo_id}")
+@app.delete("/todos/delete_todos")
 def delete_todo(todo_id: str, token: str, db: Session = Depends(get_db)):
     #validat the token
     token_user = verify_token(token)
     #check token expired or not.
-    if token_user == "expire":
+    if token_user == "expire": 
         raise HTTPException(status_code = 401, detail = "Token Expired")
     
     if not token_user:
         raise HTTPException(status_code=401, detail="Invalid token")
     #check if resource exist
-    deleted = crud.delete_todo(db, todo_id)
-    if not deleted:
-        raise HTTPException(status_code=404, detail="Todo not found")
+
+    # deleted = crud.delete_todo(db, todo_id)
+    # if not deleted:
+    #     raise HTTPException(status_code=404, detail="Todo not found")
     
+    existing = crud.get_todo(db,todo_id)
+    if not existing:
+        raise HTTPException(status_code=404, detail="Todo not found")
     #updated for rbac
-    if str(deleted.user_id) != token_user["user_id"] and token_user["role"] != "admin":
+
+    #after 3rd table but before it just existing to deleted 
+    if str(existing.user_id) != token_user["user_id"] and token_user["role"] != "admin":
         raise HTTPException(status_code = 403,detail= "Not Authorized")
     
+    #after table 3rd only
+    deleted = crud.delete_todo(db, todo_id)
+
     return {"message": "Todo soft deleted successfully"}
 
+
+#after table 3rd created.
+@app.put("/admin/assign-role")
+def assign_role(user_id: str, role: str, token: str, db: Session = Depends(get_db)):
+
+    token_user = verify_token(token)
+
+    if token_user["role"] != "admin":
+        raise HTTPException(status_code=403, detail="Only admin can assign roles")
+
+    user_role = db.query(models.UserRole).filter(
+        models.UserRole.user_role_id == user_id
+    ).first()
+
+    if not user_role:
+        raise HTTPException(status_code=404, detail="User role not found")
+
+    user_role.role = role
+
+    db.commit()
+    db.refresh(user_role)
+
+    return {"message": f"Role updated to {role}"}
     
 
 #todo_id is id of todo_list tablea
