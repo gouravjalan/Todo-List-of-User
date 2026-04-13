@@ -2,7 +2,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker,declarative_base
 #from sqlalchemy.ext.declarative import declarative_base
 
-DATABASE_URL = "mysql+pymysql://username:password@localhost/todo_db"
+DATABASE_URL = "mysql+pymysql://root:manager@localhost/todo_db"
 
 engine = create_engine(DATABASE_URL)
 #creates a db engine
@@ -28,9 +28,10 @@ Base = declarative_base()
 #database_url --->> tells python to connect to this url.
 
 #DATABASE_URL = "mysql+pymysql://root:manager@localhost/todo_db"
-#mysql  --->> is database type
+# mysql  --->> is database type
 #pymysql ---->> is python driver to connect MySQL (talk with database)
-
+#root ------->> is username of MySQL
+#manager ---->> is password
 #localhost -->> is db server location
 #todo_db ---->> the database name
 

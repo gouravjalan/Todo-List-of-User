@@ -6,7 +6,7 @@ class UserCreate(BaseModel):   #during create user the 3 parameters should be us
     name: str
     email: str
     password: str
-    role: str | None = "user"  #for 3rd table
+    role: str 
 
 class UserResponse(BaseModel):  #defines what api returns & password is hidden for security
     id: str

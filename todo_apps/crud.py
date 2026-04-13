@@ -2,8 +2,7 @@ from sqlalchemy.orm import Session #to run queries
 import models
 import schemas
 from authorization import verify_password, hash_password
-#CRUD = Create Read Update Delete
-
+from sqlalchemy.orm import joinedload
 
 #USER OPERATIONS
 #sign up logic
@@ -23,8 +22,8 @@ def signup_user(db: Session, user: schemas.UserCreate):  #to signup if new user,
     new_user = models.User(
         name=user.name,
         email=user.email,
-        password=hashed_password
-        #is_deleted = False
+        password=hashed_password,
+        roles=[models.UserRole(role=user.role.lower())]
     )
 
     db.add(new_user)
@@ -34,37 +33,28 @@ def signup_user(db: Session, user: schemas.UserCreate):  #to signup if new user,
     return new_user
 
 #login user
-def login_user(db: Session, user: schemas.UserLogin):  #to login if existing user.
+def login_user(db: Session, user):
 
-    existing_user = db.query(models.User).filter(
-        models.User.email == user.email
-    ).first()
+    existing_user = (
+        db.query(models.User)
+        .options(joinedload(models.User.roles))   # 🔥 THIS LINE FIXES YOUR ISSUE
+        .filter(models.User.email == user.email)
+        .first()
+    )
 
     if not existing_user:
         return None
 
-    if not verify_password(user.password, existing_user.password):
+    # if existing_user.password != user.password:
+    #     return None
+    # existing_user.password -------> for hashed password
+    # user.passwored ---------------> still the plain password so it do not match with above and throws error.
+    
+    if not verify_password(user.password,existing_user.password):
         return None
 
     return existing_user
 
-
-# def create_user(db: Session, user: schemas.UserCreate):
-
-#     hashed_password = hash_password(user.password)
-#     # converts normal password to hashed password and store it in db.
-
-#     new_user = models.User(  #create a new user object
-#         name=user.name,
-#         email=user.email,
-#         password=hashed_password
-#     )
-
-#     db.add(new_user)  #add new user to db
-#     db.commit()   #save to db
-#     db.refresh(new_user)  #reload db with new db data.
-
-#     return new_user
 
 
 def get_user(db: Session, user_id: str):  #to fetch single user, that's y .filter is used(filter by id) with .first (returning the first occurrence)

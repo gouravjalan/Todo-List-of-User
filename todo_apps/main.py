@@ -34,12 +34,16 @@ def signup(user: schemas.UserCreate, db: Session = Depends(get_db)):
     if not new_user:
         raise HTTPException(status_code=400, detail="User already exists.")
 
-    #after 3rd table
+    if not new_user.roles:
+        raise HTTPException(status_code=500, detail="Role not assigned properly")
+
+    role = new_user.roles[0].role
+
     return {
-        "id":new_user.id,
+        "id": new_user.id,
         "name": new_user.name,
-        "email":new_user.email,
-        "role": new_user.roles[0].role if new_user.roles else None
+        "email": new_user.email,
+        "role": role
     }
 
     #before 3rd table
@@ -70,22 +74,14 @@ def login(user: schemas.UserLogin, db: Session = Depends(get_db)):
     if not existing_user:
         raise HTTPException(status_code=401, detail="Invalid email or password.")
 
-    #get role from user_role
-    role = existing_user.roles[0].role if existing_user.roles else None
-    
-    #existing_user.roles ----------> list of UserRole
-    #existing_user.roles[0]  ----------> One UserRole Object
-    #existing_user.roles[0].role ----------> Actual role value
+    # Ensure role exists
+    if not existing_user.roles:
+        raise HTTPException(
+            status_code=400,
+            detail=f"User has no role assigned (user_id={existing_user.id})"
+        )
 
-
-
-    # create jwt token (before 3rd table)
-    # access_token = create_access_token(data={"sub": str(existing_user.id), "role" :str(existing_user.role)})
-    # refresh_token = create_refresh_token(data={"sub" : str(existing_user.id)})
-
-    #after table 3 creation
-    if not role:
-        raise HTTPException(status_code=400,detail="User has no role assigned")
+    role = existing_user.roles[0].role
 
     #below lines after making 3rd table 
     access_token = create_access_token({
@@ -337,27 +333,27 @@ def delete_todo(todo_id: str, token: str, db: Session = Depends(get_db)):
 
 
 #after table 3rd created.
-@app.put("/admin/assign-role")
-def assign_role(user_id: str, role: str, token: str, db: Session = Depends(get_db)):
+# @app.put("/admin/assign-role")
+# def assign_role(user_id: str, role: str, token: str, db: Session = Depends(get_db)):
 
-    token_user = verify_token(token)
+#     token_user = verify_token(token)
 
-    if token_user["role"] != "admin":
-        raise HTTPException(status_code=403, detail="Only admin can assign roles")
+#     if token_user["role"] != "admin":
+#         raise HTTPException(status_code=403, detail="Only admin can assign roles")
 
-    user_role = db.query(models.UserRole).filter(
-        models.UserRole.user_role_id == user_id
-    ).first()
+#     user_role = db.query(models.UserRole).filter(
+#         models.UserRole.user_role_id == user_id
+#     ).first()
 
-    if not user_role:
-        raise HTTPException(status_code=404, detail="User role not found")
+#     if not user_role:
+#         raise HTTPException(status_code=404, detail="User role not found")
 
-    user_role.role = role
+#     user_role.role = role
 
-    db.commit()
-    db.refresh(user_role)
+#     db.commit()
+#     db.refresh(user_role)
 
-    return {"message": f"Role updated to {role}"}
+#     return {"message": f"Role updated to {role}"}
     
 
 #todo_id is id of todo_list tablea
