@@ -21,7 +21,6 @@ CREATE TABLE user_role(
 	role_id CHAR(36) PRIMARY KEY,
     role ENUM ('admin','user'),
     user_role_id CHAR(36),
-    
     FOREIGN KEY (user_role_id) REFERENCES users(id)
     );
     
@@ -112,6 +111,11 @@ ALTER TABLE users DROP COLUMN role;
 INSERT INTO user_role (role_id, role, user_role_id) VALUES (UUID(), 'admin', 'acf60103-e610-49bc-98b0-a547848a2d45');
 INSERT INTO user_role (role_id, role, user_role_id) VALUES (UUID(), 'admin', '0b7c5091-dfde-44cc-b279-f970a9a64063');
 
+-- updated the name of user_role_id to user_id now
+INSERT INTO user_role (role_id, role, user_id) VALUES (UUID(), 'admin', 'fad4daf3-1b02-4917-965e-f54d64b5a8e4');
+INSERT INTO user_role (role_id, role, user_id) VALUES (UUID(), 'admin', 'a28b4931-3ed0-4ba5-85aa-94a67bbd2fe6');
+
+
 SELECT * FROM user_role WHERE user_role_id = 'cdf77685-70f1-4024-908c-e6b388857951';
 
 -- changed the name of user_role_id to user_id bcoz of naming mismatch for python as it uses user_id
@@ -121,8 +125,51 @@ ALTER TABLE user_role CHANGE user_role_id user_id CHAR(36);
 DELETE FROM user_role;
 TRUNCATE TABLE user_role;
 
+DELETE FROM users WHERE id = '044676ac-5980-4cd4-b03e-22591328f708';
+DELETE FROM users WHERE id = '0b7c5091-dfde-44cc-b279-f970a9a64063';
+DELETE FROM users WHERE id = '6f51e703-ce24-4428-969b-de5a2cc682f5';
+DELETE FROM users WHERE id = 'df6c830e-a57f-4fff-bd1b-dec43b7bd7d6';
+DELETE FROM users WHERE id = 'bf2f51d5-34d7-4a11-b909-e2038876e51f';
+DELETE FROM users WHERE id = 'ad768d12-0084-48f6-a332-5fb5e447d356';
+
+DELETE FROM users WHERE id = '5d67b74d-c2e6-4bce-aca0-c523b48ee00b';
+DELETE FROM users WHERE id = '621a8c6b-be51-43ae-aa3d-fe8890eef52b';
+DELETE FROM users WHERE id = '81fdd964-4ab2-4245-bd60-3df08fb3e9de';
+DELETE FROM users WHERE id = '4393aaf1-636c-4807-841d-44bc0cd0349c';
+
+DELETE FROM users WHERE id = 'cdf77685-70f1-4024-908c-e6b388857951';
+DELETE FROM users WHERE id = 'f5e4eaea-4339-402e-9fbf-700159ec38c7';
+DELETE FROM users WHERE id = 'acf60103-e610-49bc-98b0-a547848a2d45';
+DELETE FROM users WHERE id = '3a6dd7d6-38fb-4681-b9a1-9f0d233cc579';
+DELETE FROM users WHERE id = '1899759a-3c65-4bcd-bd88-b2e967361024';
+
+DELETE FROM todo_list WHERE id = '8878afd6-0334-44c1-b7aa-dd94503386e7';
+DELETE FROM users WHERE id = '5e2a3e86-8128-402d-8643-96e2b62f6e91';
+
+DELETE FROM todo_list WHERE id = 'cd3f9ef7-5978-495a-8046-701150bd3caa';
+DELETE FROM todo_list WHERE id = '6c5b1ae7-7cd8-47aa-8be4-8473b0f9bdfd';
+DELETE FROM todo_list WHERE id = '4e9835cf-a45e-4efc-845c-b0b4abe4bedf';
+
+DELETE FROM todo_list WHERE id = '178c15f0-dce9-4e16-a05f-a0716d0aedf1';
+
+DELETE FROM todo_list WHERE id = '207a3007-dc30-4cb0-8332-8e230fb41696';
+DELETE FROM todo_list WHERE id = '5ffa598e-c06a-4993-a824-d20e19393511';
+DELETE FROM todo_list WHERE id = '99a6d6d3-aacb-43bd-aa26-f33da8bd0352';
+
+DELETE FROM todo_list WHERE id = 'a9a4c032-594f-4b96-b7da-63062fdc2d87';
+DELETE FROM todo_list WHERE id = 'b581a2e6-54a8-420b-b4cb-54b56648d36e';
+DELETE FROM todo_list WHERE id = 'c73cac15-cf07-47bf-9d86-6819447a62b3';
+DELETE FROM todo_list WHERE id = 'c8a4e5d3-860c-4be8-9889-2b0554949e5d';
+DELETE FROM todo_list WHERE id = 'd7cc6984-6354-4594-8b67-c7f70e966730';
+
 select * from users;
 select * from todo_list;
 select * from user_role;
 
--- SELECT * FROM user_roles;    the table does not exist
+INSERT INTO user_role (role_id, role, user_id) VALUES (UUID(), 'user', '048a7eee-fc7e-4d2f-9531-d9cb64dc9987');
+INSERT INTO user_role (role_id, role, user_id) VALUES (UUID(), 'admin', 'a8638be6-a728-4989-b7cf-da4b77340afa');
+INSERT INTO user_role (role_id,role,user_id) VALUES (UUID(),'admin','3951f476-5775-4eec-aac6-963748f232c5');
+INSERT INTO user_role (role_id,role,user_id) VALUES (UUID(),'admin','367c6a33-5003-4cf3-8d81-f4e0daa47d4b');
+INSERT INTO user_role (role_id,role,user_id) VALUES (UUID(),'user','3852621d-ce11-40aa-9f4f-3f22a32bc579');
+
+
