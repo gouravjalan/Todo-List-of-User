@@ -27,8 +27,16 @@ def get_db():
 
 #sign up
 @app.post("/Signup", response_model=schemas.UserResponse)
-def signup(user: schemas.UserCreate, db: Session = Depends(get_db)):
+def signup(user: schemas.UserCreate, token: str, db: Session = Depends(get_db)):
 
+    token_user = verify_token(token)
+
+    if not token_user:
+        raise HTTPException(status_code=401,detail= "Invalid Token")
+    
+    if token_user["role"] != "admin":
+        raise HTTPException(status_code=403,detail="Not authorized to create user")
+    
     new_user = crud.signup_user(db, user)
 
     if not new_user:
@@ -141,10 +149,7 @@ def get_users(token:str, db: Session = Depends(get_db)):
     if token_user["role"] != "admin":
         raise HTTPException(status_code=403, detail= "Not authorized to access the data of all users.")
     
-    #before 3rd table
-    #return crud.get_users(db)
-
-    #after table 3rd below lines
+    
     users = crud.get_users(db)
     return [
         {

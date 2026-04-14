@@ -31,21 +31,11 @@ def verify_password(plain_password:str, hashed_password:str):
 
     return pwd_context.verify(plain_password, hashed_password)
 
-#create jwt token before table 3
-# def create_access_token(data:dict):
-#     to_encode = data.copy()
 
-#     expire = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-
-#     to_encode.update({"exp" : expire})
-
-#     encoded_jwt = jwt.encode(to_encode,SECRET_KEY,algorithm=ALGORITHM) #expllicitly working as base64 only which encodes the data
-
-#     return encoded_jwt
 
 #after table 3
 # def create_access_token(user):
-#     # 🔥 Extract role from user_roles table
+#     # Extract role from user_roles table
 #     role = user.roles[0].role if user.roles else None
 
 #     if not role:
@@ -132,22 +122,7 @@ def verify_token(token:str):
 
 #     return jwt.encode(to_encode,SECRET_KEY,algorithm=ALGORITHM)
 
-#after table 3
-# def create_refresh_token(user):
-#     role = user.roles[0].role if user.roles else None
 
-#     if not role:
-#         raise HTTPException(status_code=400, detail="User has no role assigned")
-
-#     to_encode = {
-#         "sub": str(user.id),
-#         "role": role
-#     }
-
-#     expire = datetime.utcnow() + timedelta(days=7)
-#     to_encode.update({"exp": expire})
-
-#     return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
 
 #after table 3 creation
 def create_refresh_token(data: dict):
