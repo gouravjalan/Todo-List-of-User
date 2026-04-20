@@ -1,11 +1,11 @@
-from sqlalchemy import Column, String, Boolean, ForeignKey
+from sqlalchemy import Column, String, Boolean, ForeignKey, DateTime
 from sqlalchemy.orm import relationship #to create relation between tables
 from database import Base #base class from database file
 import uuid
-# from sqlalchemy import Integer
 from sqlalchemy import Enum
+from datetime import datetime
 
-class User(Base):  #base is inherited here.
+class User(Base):  
     __tablename__ = "users"  #should match with db table name.
 
     # id = Column(Integer, primary_key=True, index=True) #index=true to make search faster
@@ -13,12 +13,13 @@ class User(Base):  #base is inherited here.
     name = Column(String(100))
     email = Column(String(100), unique=True)
     password = Column(String(255))
-    #role = Column(Enum("user","admin"), default = "user")
-
+    
+    created_at = Column(DateTime, default=datetime.utcnow)
+    modified_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    modified_by = Column(String(36), nullable=True)
+    
     todos = relationship("Todo", back_populates="user") 
         #1 user cann have multiple todo list
-
-    #roles = relationship("UserRole",back_populates="user")
 
     #after above line
     roles = relationship(
@@ -38,6 +39,10 @@ class Todo(Base):
     user_id = Column(String(36), ForeignKey("users.id")) #todo_list.user_id ===>>> users.id
     is_deleted_check = Column(Boolean,default=False)
 
+    created_at = Column(DateTime, default=datetime.utcnow)
+    modified_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    modified_by = Column(String(36), nullable=True)
+
     user = relationship("User", back_populates="todos")
     #connects todo back to user
     # it allows to connect objects in python just like foreign keys in sql.
@@ -52,6 +57,11 @@ class UserRole(Base):
     role = Column(Enum("admin","user"))
     # user_role_id = Column(String(36),ForeignKey("users.id"))
     user_id = Column(String(36),ForeignKey("users.id"))
+
+    created_at = Column(DateTime, default=datetime.utcnow)
+    modified_at = Column(DateTime,default=datetime.utcnow,onupdate=datetime.utcnow)
+    modified_by = Column(String(36),nullable=True)
+
     user = relationship("User",back_populates="roles")
 
 

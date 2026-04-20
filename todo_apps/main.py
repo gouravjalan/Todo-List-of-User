@@ -25,27 +25,57 @@ def get_db():
 
 # USER ROUTES
 
-#sign up
+#sign up without oauth2
+# @app.post("/Signup", response_model=schemas.UserResponse)
+# def signup(user: schemas.UserCreate, token: str, db: Session = Depends(get_db)):
+
+#     token_user = verify_token(token)
+
+#     if not token_user:
+#         raise HTTPException(status_code=401,detail= "Invalid Token")
+    
+#     if token_user["role"] != "admin":
+#         raise HTTPException(status_code=403,detail="Not authorized to create user")
+    
+#     new_user = crud.signup_user(db, user,token_user)
+
+#     if not new_user:
+#         raise HTTPException(status_code=400, detail="User already exists.")
+
+#     if not new_user.roles:
+#         raise HTTPException(status_code=500, detail="Role not assigned properly")
+
+#     role = new_user.roles[0].role
+
+#     return {
+#         "id": new_user.id,
+#         "name": new_user.name,
+#         "email": new_user.email,
+#         "role": role
+#     }
+
+    #before 3rd table
+    #return new_user
+
+
+#for oauth2 authorization signup is changed.
 @app.post("/Signup", response_model=schemas.UserResponse)
-def signup(user: schemas.UserCreate, token: str, db: Session = Depends(get_db)):
+def signup(
+    user: schemas.UserCreate,
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(verify_token)
+):
 
-    token_user = verify_token(token)
+    # Only admin can create users
+    if current_user["role"] != "admin":
+        raise HTTPException(status_code=403, detail="Only admin can create users")
 
-    if not token_user:
-        raise HTTPException(status_code=401,detail= "Invalid Token")
-    
-    if token_user["role"] != "admin":
-        raise HTTPException(status_code=403,detail="Not authorized to create user")
-    
-    new_user = crud.signup_user(db, user)
+    new_user = crud.signup_user(db, user, current_user)
 
     if not new_user:
         raise HTTPException(status_code=400, detail="User already exists.")
 
-    if not new_user.roles:
-        raise HTTPException(status_code=500, detail="Role not assigned properly")
-
-    role = new_user.roles[0].role
+    role = new_user.roles[0].role if new_user.roles else "user"
 
     return {
         "id": new_user.id,
@@ -54,8 +84,6 @@ def signup(user: schemas.UserCreate, token: str, db: Session = Depends(get_db)):
         "role": role
     }
 
-    #before 3rd table
-    #return new_user
 
 #to login ----->>> this code before use of jwt
 # @app.post("/login")
@@ -71,42 +99,67 @@ def signup(user: schemas.UserCreate, token: str, db: Session = Depends(get_db)):
 #     }
 
 
-#this is login part when using jwt login
-# this for earlier when json format 
-
-@app.post("/Login", response_model=schemas.Token)
-def login(user: schemas.UserLogin, db: Session = Depends(get_db)):
+#this is login part when using jwt login. Without oauth2 Authorization
+# @app.post("/Login", response_model=schemas.Token)
+# def login(user: schemas.UserLogin, db: Session = Depends(get_db)):
     
-    existing_user = crud.login_user(db, user)
+#     existing_user = crud.login_user(db, user)
 
-    if not existing_user:
-        raise HTTPException(status_code=401, detail="Invalid email or password.")
+#     if not existing_user:
+#         raise HTTPException(status_code=401, detail="Invalid email or password.")
 
-    # Ensure role exists
-    if not existing_user.roles:
-        raise HTTPException(
-            status_code=400,
-            detail=f"User has no role assigned (user_id={existing_user.id})"
-        )
+#     # Ensure role exists
+#     if not existing_user.roles:
+#         raise HTTPException(
+#             status_code=400,
+#             detail=f"User has no role assigned (user_id={existing_user.id})"
+#         )
 
-    role = existing_user.roles[0].role
+#     role = existing_user.roles[0].role
 
-    #below lines after making 3rd table 
+#     #below lines after making 3rd table 
+#     access_token = create_access_token({
+#         "sub": str(existing_user.id),
+#         "role": role
+#         }
+#     )
+
+#     refresh_token = create_refresh_token({
+#         "sub": str(existing_user.id)
+#         }
+#     )
+
+#     return {
+#         "access_token": access_token,
+#         "token_type": "bearer",
+#         "refresh_token": refresh_token
+#     }
+
+
+#for oauth2 authorization login api code changed.
+from fastapi.security import OAuth2PasswordRequestForm
+
+@app.post("/Login")
+def login(
+    form_data: OAuth2PasswordRequestForm = Depends(),
+    db: Session = Depends(get_db)
+):
+
+    user = crud.login_user(db, form_data)
+
+    if not user:
+        raise HTTPException(status_code=401, detail="Invalid credentials")
+
+    role = user.roles[0].role
+
     access_token = create_access_token({
-        "sub": str(existing_user.id),
+        "sub": str(user.id),
         "role": role
-        }
-    )
-
-    refresh_token = create_refresh_token({
-        "sub": str(existing_user.id)
-        }
-    )
+    })
 
     return {
         "access_token": access_token,
-        "token_type": "bearer",
-        "refresh_token": refresh_token
+        "token_type": "bearer"
     }
 
 #an api for a refresh token
@@ -201,24 +254,38 @@ def get_user(user_id: str, token :str, db: Session = Depends(get_db)):
 
 # TODO ROUTES
 
-#create todo list (authenticated)
+#create todo list  without oauth2
+# @app.post("/users/create_todo_list", response_model=schemas.TodoResponse)
+# def create_todo(user_id: str, token: str, todo: schemas.TodoCreate, db: Session = Depends(get_db)):
+
+#     token_user = verify_token(token)
+
+#     if token_user == "expire":
+#         raise HTTPException(status_code = 401, detail="Token Expired.")
+    
+#     if not token_user:
+#         raise HTTPException(status_code=401,detail="Invalid token.")
+    
+#     #updated for rbac
+#     if user_id != token_user["user_id"] and token_user["role"] != "admin":
+#         raise HTTPException(status_code=403,detail="Not authorized to create todo list of user.")
+    
+#     return crud.create_todo(db, user_id, todo,token_user)  
+    #token_user added to get modified_by data in the table
+
+#with oauth2 authorization
 @app.post("/users/create_todo_list", response_model=schemas.TodoResponse)
-def create_todo(user_id: str, token:str, todo: schemas.TodoCreate, db: Session = Depends(get_db)):
+def create_todo(
+    user_id: str,
+    todo: schemas.TodoCreate,
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(verify_token)
+):
 
-    token_user = verify_token(token)
+    if user_id != current_user["user_id"] and current_user["role"] != "admin":
+        raise HTTPException(status_code=403, detail="Not authorized")
 
-    if token_user == "expire":
-        raise HTTPException(status_code = 401, detail="Token Expired.")
-    
-    if not token_user:
-        raise HTTPException(status_code=401,detail="Invalid token.")
-    
-    #updated for rbac
-    if user_id != token_user["user_id"] and token_user["role"] != "admin":
-        raise HTTPException(status_code=403,detail="Not authorized to create todo list of user.")
-    
-    return crud.create_todo(db, user_id, todo)
-
+    return crud.create_todo(db, user_id, todo, current_user)
 #get all todo of user
 # the below code uses both token and id to get the user which means that it's working is same as that of get a single todo list.
 # def get_user_todos(user_id: str, token: str,  db: Session = Depends(get_db)):
@@ -272,69 +339,113 @@ def get_todo(todo_id: str, token :str, db: Session = Depends(get_db)):
 
     return todo
 
-#update todo list
+#update todo list without oauth2
+# @app.put("/todos/update_todos", response_model=schemas.TodoResponse)
+# def update_todo(todo_id: str, token : str , todo: schemas.TodoUpdate, db: Session = Depends(get_db)):
+#     token_user = verify_token(token)
+
+#     #to check token expiry.
+#     if token_user == "expire":
+#         raise HTTPException(status_code = 401, detail = "Token Expired")
+    
+#     if not token_user:
+#         raise HTTPException(status_code=401, detail="Invalid token")
+    
+#     #for rbac only. If not then prefer updated at end.
+#     # updated = crud.update_todo(db,todo_id,todo)  #here the order in which we give parameters should be same as that in crud.py file function of update.
+#     # if not updated:
+#     #     raise HTTPException(status_code=404, detail="Todo not found")
+
+#     #after table 3rd
+#     existing = crud.get_todo(db,todo_id)
+#     if not existing:
+#         raise HTTPException(status_code=404, detail="Todo not found")
+
+#     #before and after table 3rd same part as it is
+#     #just change existing to updated before making of 3rd table
+#     #updated for rbac
+#     if str(existing.user_id) != token_user["user_id"] and token_user["role"] != "admin":
+#         raise HTTPException(status_code=403, detail="Not Authorized")
+    
+#     #it is here bcoz we will update after the authorization not before authorization.
+#     updated = crud.update_todo(db, todo_id, todo)
+
+#     return updated
+
+
+#for oauth2 authorization update api code changes
 @app.put("/todos/update_todos", response_model=schemas.TodoResponse)
-def update_todo(todo_id: str, token : str , todo: schemas.TodoUpdate, db: Session = Depends(get_db)):
-    token_user = verify_token(token)
+def update_todo(
+    todo_id: str,
+    todo: schemas.TodoUpdate,
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(verify_token)
+):
 
-    #to check token expiry.
-    if token_user == "expire":
-        raise HTTPException(status_code = 401, detail = "Token Expired")
-    
-    if not token_user:
-        raise HTTPException(status_code=401, detail="Invalid token")
-    
-    #for rbac only. If not then prefer updated at end.
-    # updated = crud.update_todo(db,todo_id,todo)  #here the order in which we give parameters should be same as that in crud.py file function of update.
-    # if not updated:
-    #     raise HTTPException(status_code=404, detail="Todo not found")
+    existing = crud.get_todo(db, todo_id)
 
-    #after table 3rd
-    existing = crud.get_todo(db,todo_id)
     if not existing:
         raise HTTPException(status_code=404, detail="Todo not found")
 
-    #before and after table 3rd same part as it is
-    #just change existing to updated before making of 3rd table
-    #updated for rbac
-    if str(existing.user_id) != token_user["user_id"] and token_user["role"] != "admin":
+    # Ownership + Admin check
+    if str(existing.user_id) != current_user["user_id"] and current_user["role"] != "admin":
         raise HTTPException(status_code=403, detail="Not Authorized")
-    
-    #it is here bcoz we will update after the authorization not before authorization.
-    updated = crud.update_todo(db, todo_id, todo)
+
+    updated = crud.update_todo(db, todo_id, todo, current_user)
 
     return updated
 
-#delete todo list
-@app.delete("/todos/delete_todos")
-def delete_todo(todo_id: str, token: str, db: Session = Depends(get_db)):
-    #validat the token
-    token_user = verify_token(token)
-    #check token expired or not.
-    if token_user == "expire": 
-        raise HTTPException(status_code = 401, detail = "Token Expired")
-    
-    if not token_user:
-        raise HTTPException(status_code=401, detail="Invalid token")
-    #check if resource exist
 
-    # deleted = crud.delete_todo(db, todo_id)
-    # if not deleted:
-    #     raise HTTPException(status_code=404, detail="Todo not found")
+
+#delete todo list
+# @app.delete("/todos/delete_todos")
+# def delete_todo(todo_id: str, token: str, db: Session = Depends(get_db)):
+#     #validat the token
+#     token_user = verify_token(token)
+#     #check token expired or not.
+#     if token_user == "expire": 
+#         raise HTTPException(status_code = 401, detail = "Token Expired")
     
-    existing = crud.get_todo(db,todo_id)
+#     if not token_user:
+#         raise HTTPException(status_code=401, detail="Invalid token")
+#     #check if resource exist
+
+#     # deleted = crud.delete_todo(db, todo_id)
+#     # if not deleted:
+#     #     raise HTTPException(status_code=404, detail="Todo not found")
+    
+#     existing = crud.get_todo(db,todo_id)
+#     if not existing:
+#         raise HTTPException(status_code=404, detail="Todo not found")
+#     #updated for rbac
+
+#     #after 3rd table but before it just existing to deleted 
+#     if str(existing.user_id) != token_user["user_id"] and token_user["role"] != "admin":
+#         raise HTTPException(status_code = 403,detail= "Not Authorized")
+    
+#     #after table 3rd only
+#     deleted = crud.delete_todo(db, todo_id)
+
+#     return {"message": "Todo soft deleted successfully"}
+
+
+#for oauth2 authorization delete api code changed.
+@app.delete("/todos/delete/{todo_id}")
+def delete_todo(
+    todo_id: str,
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(verify_token)
+):
+
+    existing = crud.get_todo(db, todo_id)
+
     if not existing:
         raise HTTPException(status_code=404, detail="Todo not found")
-    #updated for rbac
 
-    #after 3rd table but before it just existing to deleted 
-    if str(existing.user_id) != token_user["user_id"] and token_user["role"] != "admin":
-        raise HTTPException(status_code = 403,detail= "Not Authorized")
-    
-    #after table 3rd only
-    deleted = crud.delete_todo(db, todo_id)
+    if str(existing.user_id) != current_user["user_id"] and current_user["role"] != "admin":
+        raise HTTPException(status_code=403, detail="Not authorized")
 
-    return {"message": "Todo soft deleted successfully"}
+    return crud.delete_todo(db, todo_id)
 
 
 #after table 3rd created.

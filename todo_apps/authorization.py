@@ -1,7 +1,8 @@
 from passlib.context import CryptContext
 from jose import JWTError,jwt,ExpiredSignatureError
 from datetime import datetime,timedelta
-from fastapi import HTTPException
+from fastapi import HTTPException, Depends
+from fastapi.security import OAuth2PasswordBearer
 
 
 
@@ -61,56 +62,60 @@ def create_access_token(data:dict):
 
     return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
 
-
-
     
-# to verify token  for oauth2 authentication.
-# def verify_token(token: str = Depends(oauth2_scheme)):
-#     try:
-#         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-#         user_id: str = payload.get("sub")
-#         role: str = payload.get("role")
+# to verify token  for oauth2 authorization
 
-#         if user_id is None or role is None:
-#             raise HTTPException(status_code=401, detail="Invalid token")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl=  "Login")
 
-#         return { 
-#             "user_id" : user_id,
-#             "role": role
-#         }
-
-#     except JWTError:
-#         raise HTTPException(status_code=401, detail="Invalid token")
-
-#for jwt
-def verify_token(token:str):
+def verify_token(token: str = Depends(oauth2_scheme)):
     try:
-        payload = jwt.decode(token,SECRET_KEY,algorithms=[ALGORITHM])  #deocdes the parameters that r given.
-        user_id = payload.get("sub") #from the decoded data get the subject/id of user and store in user_id.
-        role = payload.get("role")
-        # return user_id.strip() if user_id else None
-        #strip is used to remove unwanted space.
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        user_id: str = payload.get("sub")
+        role: str = payload.get("role")
 
-        #for rbac
-        if not user_id or not role:
-            raise HTTPException(status_code=401,detail="Invalid Token")
-        
-        return{
-            "user_id" : user_id.strip(),
-            "role": role
-        } 
-        
-    #when the token gets expired.
-    except ExpiredSignatureError:
-        raise HTTPException(status_code=401,detail="Token Expired")
-        # return "expired"
-        #to catch error if anything goes invalid/expired/worng
-        # instead of crashing, return none.
+        if user_id is None or role is None:
+             raise HTTPException(status_code=401, detail="Invalid token")
+
+        return { 
+             "user_id" : user_id,
+             "role": role
+         }
 
     except JWTError:
-        raise HTTPException(status_code=401,detail="Invalid Token")
-        # return None
-        #runs if token is invalid/wrong/corrupted.
+        raise HTTPException(status_code=401, detail="Invalid token")
+    
+    except ExpiredSignatureError:
+        raise HTTPException(status_code=401, detail="Token Expired")
+
+#for jwt token authentication.
+# def verify_token(token:str):
+#     try:
+#         payload = jwt.decode(token,SECRET_KEY,algorithms=[ALGORITHM])  #deocdes the parameters that r given.
+#         user_id = payload.get("sub") #from the decoded data get the subject/id of user and store in user_id.
+#         role = payload.get("role")
+#         # return user_id.strip() if user_id else None
+#         #strip is used to remove unwanted space.
+
+#         #for rbac
+#         if not user_id or not role:
+#             raise HTTPException(status_code=401,detail="Invalid Token")
+        
+#         return{
+#             "user_id" : user_id.strip(),
+#             "role": role
+#         } 
+        
+#     #when the token gets expired.
+#     except ExpiredSignatureError:
+#         raise HTTPException(status_code=401,detail="Token Expired")
+#         # return "expired"
+#         # to catch error if anything goes invalid/expired/worng
+#         # instead of crashing, return none.
+
+#     except JWTError:
+#         raise HTTPException(status_code=401,detail="Invalid Token")
+#         # return None
+#         # runs if token is invalid/wrong/corrupted.
     
     
 #to create a refresh token before table 3
