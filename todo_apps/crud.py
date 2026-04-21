@@ -43,7 +43,7 @@ def signup_user(db: Session, user: schemas.UserCreate,current_user):  #to signup
 
 #     existing_user = (
 #         db.query(models.User)
-#         .options(joinedload(models.User.roles))   # 🔥 THIS LINE FIXES YOUR ISSUE
+#         .options(joinedload(models.User.roles))   #THIS LINE FIXES YOUR ISSUE
 #         .filter(models.User.email == user.email)
 #         .first()
 #     )
