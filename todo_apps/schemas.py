@@ -35,6 +35,7 @@ class TodoCreate(BaseModel): #during creating todo list of user the 2 parameters
 
 class TodoUpdate(BaseModel):  #Used for updating task status.(true/false only)
     completed: bool
+    
 
 class TodoResponse(BaseModel): #api response structure.
     id: str

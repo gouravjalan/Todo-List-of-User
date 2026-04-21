@@ -135,7 +135,6 @@ INSERT INTO user_role (role_id,role,user_id) VALUES (UUID(),'admin','3951f476-57
 INSERT INTO user_role (role_id,role,user_id) VALUES (UUID(),'user','3852621d-ce11-40aa-9f4f-3f22a32bc579');
 
 -- To add the 3 more columns in existing tables
-
 ALTER TABLE users ADD COLUMN created_at TIMESTAMP;
 ALTER TABLE users ADD COLUMN modified_at TIMESTAMP;
 ALTER TABLE users ADD COLUMN modified_by VARCHAR(36);

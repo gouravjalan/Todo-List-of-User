@@ -143,10 +143,7 @@ def update_todo(db: Session, todo_id: str, todo: schemas.TodoUpdate, current_use
     if not existing_todo:
         return None
 
-    existing_todo.title = todo.title
-    existing_todo.description = todo.description
-
-    # 🔥 Audit field
+    existing_todo.completed = todo.completed
     existing_todo.modified_by = current_user["user_id"]
 
     db.commit()
